@@ -13,16 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Prism.Core" Version="9.0.537" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="Icon\Icon1.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Styles\" />
   </ItemGroup>
 
 </Project>

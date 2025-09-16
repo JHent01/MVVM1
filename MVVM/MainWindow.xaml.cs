@@ -25,7 +25,7 @@ namespace MVVM
           public MainWindow()
         {
             InitializeComponent();
-            DataContext = new ViewModel();
+            DataContext = new MainViewModel();
       
             WikendBox.Items.Add("Выходной");
             WikendBox.Items.Add("Рабочий");
