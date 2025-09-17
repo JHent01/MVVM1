@@ -4,16 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVM"
+      
         mc:Ignorable="d"
+        
         d:DataContext="{local:MainViewModel}"
+        
        Icon="pack://application:,,,/Icon/Icon1.ico"  Title ="Анкета" Height="500" Width="800">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/StyleButton.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+            
+                <local:VisibilityConvert x:Key="VisibilityConvert"/>
+            
 
+        </ResourceDictionary>
+  
     </Window.Resources>
     <Grid Name="All"  >
         <Grid.ColumnDefinitions>
@@ -49,7 +56,8 @@
         <Button Grid.Row="3" Name="Clear" Content="Очистити все"  Style="{StaticResource ButtonStyle}" Command="{Binding ClearAllCommand}"/>
         <Button Grid.Row="2" Name="Delete" Content="Видалити"  Style="{StaticResource ButtonStyle}" Command="{Binding DeleteCommand}" />
 
-        <Grid Name="Info" Grid.Column="1" Grid.Row="0" Grid.RowSpan="6" Visibility ="{Binding VisibilityConvert, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"     >
+        <Grid Name="Info" Grid.Column="1" Grid.Row="0" Grid.RowSpan="6" Visibility="{Binding VisibilityConverts, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource VisibilityConvert}}"
+              Grid.ColumnSpan="2"     >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="230" />
 
@@ -96,7 +104,7 @@
             <Button Grid.Column="4"  Grid.Row="0" Grid.RowSpan="7" Name="SaveEdit" Content="Зберегти зміни" Width="100" Height="30"  Margin="10,10,10,30"  FontWeight="Medium" VerticalAlignment="Bottom" HorizontalAlignment="Right"   Command="{Binding SaveCommand}" />
 
         </Grid>
-        <Button  Grid.Column="0" Grid.Row="4" Name="Save" Content="Зберегти Файл" Width="100" Height="30"  Background="Green" FontWeight="Medium" VerticalAlignment="Top" Command="{Binding SaveJsonCommand}"/>
+        <Button  Grid.Column="0" Grid.Row="4" Name="Save" Content="Зберегти Файл" Width="100" Height="30"  Background="Green" FontWeight="Medium" VerticalAlignment="Top" Command="{Binding SaveJsonCommand}"   IsEnabled="{Binding EnableButton}"/>
         <Button Grid.Column="0" Grid.Row="4"  Name="OpenTxT" Content="Відкрити файл" Width="100" Height="30"  Background="SkyBlue"  FontWeight="Medium" VerticalAlignment="Top"  Command="{Binding OpenJsonCommand}" Margin="5,40,5,0" Grid.RowSpan="2"/>
       
     </Grid>

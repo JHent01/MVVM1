@@ -4,134 +4,122 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
-
+using MVVM.Converts;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 
 namespace MVVM
 {
-    public  class MainViewModel : INotifyPropertyChanged 
+    public class MainViewModel : INotifyPropertyChanged
     {
         public MainViewModel()
         {
-            UpdetePhotoProf = new RelayCommand(UpdatePhotoProf);
-            DeleteCommand = new RelayCommand(DeletePerson);
+            #region CommandsInitialization
+            UpdetePhotoProf = new RelayCommand(UpdatePhotoProf); 
             AddCommand = new RelayCommand(Add);
             SaveCommand = new RelayCommand(Save);
+            DeleteCommand = new RelayCommand(DeletePerson);
             CanselCommand = new RelayCommand(Cansel);
             ClearAllCommand = new RelayCommand(ClearAll);
             OpenJsonCommand = new RelayCommand(OpenJson);
             SaveJsonCommand = new RelayCommand(SaveJson);
+            #endregion
         }
-      
+
         private ObservableCollection<PersonViewModel> _persons = new ObservableCollection<PersonViewModel>();
         public ObservableCollection<PersonViewModel> Persons
         {
             get => _persons;
             set
             {
-                
+
                 _persons = value;
                 OnPropertyChanged();
             }
         }
-      
+
         private PersonViewModel _selectedPerson;
         public PersonViewModel SelectedPerson
-        { 
+        {
             get { return _selectedPerson; }
             set
             {
-                
 
-                    _selectedPerson = value;
-                    Names = SelectedPerson?.PersonName;
-                    Age = SelectedPerson?.Age;
-                    if (SelectedPerson != null) Post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
-                    if (SelectedPerson != null) Weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
-                    PhotoProf = SelectedPerson?.PhotoProf;
-          
+
+                _selectedPerson = value;
+                Names = SelectedPerson?.PersonName;
+                Age = SelectedPerson?.Age;
+                if (SelectedPerson != null) Post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
+                if (SelectedPerson != null) Weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
+                PhotoProf = SelectedPerson?.PhotoProf;
+
 
                 if (SelectedPerson != null)
                 {
-                    VisibilityConvert = "visibility";
+                    VisibilityConverts = true;
                 }
-                else 
+                else
                 {
-                    VisibilityConvert = null;
-                    //Visibility.Collapsed; 
+                    VisibilityConverts = false;
+                   
                 }
-               
+
                 OnPropertyChanged("SelectedPerson");
 
 
-                
+
             }
 
         }
-
-        //private Visibility _visibility = Visibility.Hidden;
-        //public Visibility Visibility
-        //{
-        //    get { return _visibility; }
-        //    set
-        //    {
-        //        _visibility = value;
-        //        OnPropertyChanged("visibility");
-        //    }
-        //}
-        private object _visibilityConvert = new VisibilityConvert().Convert(null,null,null,null);
-        public object VisibilityConvert
+      
+        private bool _visibilityConvert ;
+        public bool VisibilityConverts
         {
             get { return _visibilityConvert; }
             set
             {
-                _visibilityConvert = value;// проблма в нуле . не обрабатывается илиже не конвертируется 
-                OnPropertyChanged("visibilityConvert");
+                _visibilityConvert = value;
+                OnPropertyChanged();
+                
             }
         }
 
+        private bool _enableButton;
+        public bool EnableButton
+        {
+            get { return _enableButton; }
+            set
+            {
+                _enableButton = value;
+                OnPropertyChanged();
+            }
+        }
+        #region Property
 
-
-
-
-
-
-
-        //private object _visibility = visibilityConvert.Convert();
-        //public object Visibility
-        //{
-        //    get { return _visibility; }
-        //    set
-        //    {
-        //        if (_visibility == null) _visibility= visibilityConvert.Convert(null, null, null, null); 
-
-        //        _visibility = visibilityConvert.Convert(value,null,null,null);
-        //        OnPropertyChanged("visibility");
-        //    }
-        //}
-
+        
         private string _names;
         public string Names
         {
-            get  { return _names; }
+            get { return _names; }
             set
             {
-                
-                    _names = value;
-                    OnPropertyChanged("Names");
-                
-              
-                
+
+                _names = value;
+                OnPropertyChanged("Names");
+
+
+
             }
         }
 
@@ -143,34 +131,34 @@ namespace MVVM
             {
 
                 _age = value;
-                    OnPropertyChanged("Age");
-                
+                OnPropertyChanged("Age");
+
             }
         }
 
-       private EnumWeekend _weekend;
+        private EnumWeekend _weekend;
         public EnumWeekend Weekend
         {
-            get {return _weekend; }
+            get { return _weekend; }
             set
             {
 
                 _weekend = value;
-                    OnPropertyChanged("Weekend");
-                
+                OnPropertyChanged("Weekend");
+
             }
         }
 
         private BitmapImage _photoProf;
         public BitmapImage PhotoProf
         {
-            get {return _photoProf; }
+            get { return _photoProf; }
             set
             {
 
                 _photoProf = value;
-                    OnPropertyChanged("PhotoProf");
-                
+                OnPropertyChanged("PhotoProf");
+
             }
         }
 
@@ -185,26 +173,27 @@ namespace MVVM
                 OnPropertyChanged(nameof(Post));
             }
         }
-    
 
+        #endregion
         #region Commands
+        #region SaveOpenJson
         public ObservableCollection<Person> OpenList { get; set; } = new ObservableCollection<Person>();
         public ICommand OpenJsonCommand { get; private set; }
         private void OpenJson()
         {
-        
+
             OpenFileDialog dlg = new OpenFileDialog();
             var people = new List<PersonViewModel>();
-            
+
             dlg.Filter = "Json documents (.json)|*.json";
             Nullable<bool> result = dlg.ShowDialog();
             if (result == true)
             {
                 Persons.Clear();
-                
+
                 string jsonContent = File.ReadAllText(dlg.FileName);
                 OpenList = System.Text.Json.JsonSerializer.Deserialize<ObservableCollection<Person>>(jsonContent);
-                
+
 
                 for (int i = 0; i < OpenList.Count; i++)
                 {
@@ -213,18 +202,17 @@ namespace MVVM
                     {
                         var bitmap = new BitmapImage();
                         bitmap.BeginInit();
-                        bitmap.UriSource = new Uri(person.PfotoProf);
+                        bitmap.UriSource = new Uri(person.PfotoProf);// для того что б можно было менять тот же файл из которого брались фотки 
                         bitmap.CacheOption = BitmapCacheOption.OnLoad;
                         bitmap.EndInit();
                         var parsePost = (EnumPost)Enum.Parse(typeof(EnumPost), person.Post);
                         var parseWeekend = (EnumWeekend)Enum.Parse(typeof(EnumWeekend), person.Weekend);
 
-                       Persons.Add(new PersonViewModel {PersonName= person.Name, Age=person.Age,Post= parsePost,Weekend= parseWeekend, PhotoProf= bitmap });
+                        Persons.Add(new PersonViewModel { PersonName = person.Name, Age = person.Age, Post = parsePost, Weekend = parseWeekend, PhotoProf = bitmap });
                     }
                 }
             }
         }
-
         public ICommand SaveJsonCommand { get; private set; }
         private void SaveJson()
         {
@@ -236,7 +224,7 @@ namespace MVVM
                 string pach = dlg.FileName.Remove(dlg.FileName.Length - dlg.SafeFileName.Length, dlg.SafeFileName.Length);
                 Directory.CreateDirectory(pach + "Image");
                 var peopleToSave = new ObservableCollection<Person>();
-             
+
                 for (int i = 0; i < Persons.Count; i++)
                 {
                     var person = Persons[i] as PersonViewModel;
@@ -253,38 +241,35 @@ namespace MVVM
                         {
                             encoder.Save(fileStream);
                         }
-                        peopleToSave.Add(new Person { Name = person.PersonName, Age= person.Age, Post=person.Post.ToString(),Weekend= person.Weekend.ToString(),PfotoProf= System.IO.Path.Combine(pach + "Image", $"image{i}.png") });
+                        peopleToSave.Add(new Person { Name = person.PersonName, Age = person.Age, Post = person.Post.ToString(), Weekend = person.Weekend.ToString(), PfotoProf = System.IO.Path.Combine(pach + "Image", $"image{i}.png") });
                     }
                     string jsonContent = System.Text.Json.JsonSerializer.Serialize(peopleToSave);
                     File.WriteAllText(dlg.FileName, jsonContent);
                 }
+                MessageBox.Show("Файл збережено");
+                EnableButton= false;  
+                OnPropertyChanged();
             }
         }
-
-
+        #endregion
+        #region ChangedComands
         public ICommand SaveCommand { get; private set; }
         private void Save()
         {
-            //var a = SelectedPerson?.PersonName;
-
-           
-            //PersonViewModel dataToUpdate = Persons.FirstOrDefault(d => d.PersonName == a);
-            PersonViewModel dataToUpdate = null;
             
-            bool check=false;
+            PersonViewModel dataToUpdate = null;
+
+            bool check = false;
             for (int i = 0; i < Persons.Count; i++)
             {
                 dataToUpdate = Persons.OfType<PersonViewModel>().ElementAt(i);
-                if (dataToUpdate.Age==SelectedPerson.Age&& dataToUpdate.PersonName==SelectedPerson.PersonName&& dataToUpdate.Post.ToString()==SelectedPerson.Post.ToString())
+                if (dataToUpdate.Age == SelectedPerson.Age && dataToUpdate.PersonName == SelectedPerson.PersonName && dataToUpdate.Post.ToString() == SelectedPerson.Post.ToString())
                 {
                     check = true;
-                   
+
                     break;
                 }
             }
-
-
-
             if (check)
             {
                 dataToUpdate.PersonName = Names;
@@ -292,48 +277,30 @@ namespace MVVM
                 dataToUpdate.Post = (EnumPost)(Post != null ? Post : default);
                 dataToUpdate.Weekend = (EnumWeekend)(Weekend != null ? Weekend : default);
                 dataToUpdate.PhotoProf = PhotoProf;
-               
-
             }
-            else 
-            { 
-                Persons.Add(new PersonViewModel { PersonName = Names, Age = Age, Post = Post, Weekend = Weekend, PhotoProf = PhotoProf });
-                SelectedPerson = null;
-            }
-            
-            
+            //else
+            //{
+            //    Persons.Add(new PersonViewModel { PersonName = Names, Age = Age, Post = Post, Weekend = Weekend, PhotoProf = PhotoProf });
+            //    SelectedPerson = null;
+            //}
+
+
         }
-
-
-        public ICommand AddCommand { get; private set; }
-        private void Add()
+        public ICommand UpdetePhotoProf { get; private set; }
+        private void UpdatePhotoProf()
         {
-            SelectedPerson=(new PersonViewModel { PersonName = "New Person", Age = "0", Post = default, Weekend = default, PhotoProf = new BitmapImage(new Uri("/Image/Baze.jpg", UriKind.Relative)) });
-            OnPropertyChanged("Persons");
-        }
-
-        public ICommand DeleteCommand { get; private set; }
-        private void DeletePerson()
-        {
-            MessageBoxResult result = MessageBox.Show("Видалити Людину?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
             {
-                if (result == MessageBoxResult.No)
-                {
-                    return;
-                }
-                else if (result == MessageBoxResult.Yes)
-                {
+                string selectedFileName = openFileDialog.FileName;
 
-                    if (SelectedPerson != null)
-                    {//_persons??
-                        Persons.Remove(SelectedPerson);
-                        SelectedPerson = null;
-                        OnPropertyChanged("Persons");
-                    }
-                }
+                BitmapImage image = new BitmapImage();
+                image = new BitmapImage(new Uri(selectedFileName));
+                PhotoProf = image;
+                OnPropertyChanged("PhotoProf");
             }
         }
-
         public ICommand CanselCommand { get; private set; }
         private void Cansel()
         {
@@ -357,15 +324,25 @@ namespace MVVM
                     OnPropertyChanged("Post");
                     OnPropertyChanged("Weekend");
                     OnPropertyChanged("PhotoProf");
-                    VisibilityConvert = null;
+                    VisibilityConverts = false;
                     OnPropertyChanged("visibility");
                 }
             }
         }
-
-        public ICommand ClearAllCommand { get; private set; }
-        private void ClearAll()
-        { MessageBoxResult result = MessageBox.Show("Видалити весь список?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        #endregion
+        #region AddDeleteClearAll  
+        public ICommand AddCommand { get; private set; }
+        private void Add()
+        {
+            SelectedPerson = (new PersonViewModel { PersonName = "New Person", Age = "0", Post = default, Weekend = default, PhotoProf = new BitmapImage(new Uri("/Image/Baze.jpg", UriKind.Relative)) });
+            Persons.Add(SelectedPerson);
+            EnableButton= true;
+            OnPropertyChanged();//"Persons"
+        }
+        public ICommand DeleteCommand { get; private set; }
+        private void DeletePerson()
+        {
+            MessageBoxResult result = MessageBox.Show("Видалити Людину?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
             {
                 if (result == MessageBoxResult.No)
                 {
@@ -373,44 +350,54 @@ namespace MVVM
                 }
                 else if (result == MessageBoxResult.Yes)
                 {
-                
 
-                Persons.Clear();
-                _names = string.Empty;
-                _age = string.Empty;
-                _post = default;
-                _weekend = default;
-                _photoProf = null;
-                OnPropertyChanged("Names");
-                OnPropertyChanged("Age");
-                OnPropertyChanged("Post");
-                OnPropertyChanged("Weekend");
-                OnPropertyChanged("PhotoProf");
-                    VisibilityConvert =null;
-                    //visibilityConvert.Convert(null, null, null, null);
-                    OnPropertyChanged("visibility");
+                    if (SelectedPerson != null)
+                    {//_persons??
+                        Persons.Remove(SelectedPerson);
+                        SelectedPerson = null;
+                        OnPropertyChanged("Persons");
+                    }
+                    VisibilityConverts = false;
+                    if (Persons.Count == 0)
+                    {
+                        EnableButton = false;
+                    }   
+                    OnPropertyChanged();
                 }
             }
         }
-
-
-        public ICommand UpdetePhotoProf { get; private set; }
-        private void UpdatePhotoProf()
+        public ICommand ClearAllCommand { get; private set; }
+        private void ClearAll()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
-            if (openFileDialog.ShowDialog() == true)
+            MessageBoxResult result = MessageBox.Show("Видалити весь список?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
             {
-                string selectedFileName = openFileDialog.FileName;
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+                else if (result == MessageBoxResult.Yes)
+                {
 
-                BitmapImage image = new BitmapImage();
-                image= new BitmapImage(new Uri(selectedFileName));
-                PhotoProf = image;
-                OnPropertyChanged("PhotoProf");
+
+                    Persons.Clear();
+                    _names = string.Empty;
+                    _age = string.Empty;
+                    _post = default;
+                    _weekend = default;
+                    _photoProf = null;
+                    VisibilityConverts = false;
+                    EnableButton = false;
+                    //OnPropertyChanged("Names");
+                    //OnPropertyChanged("Age");
+                    //OnPropertyChanged("Post");
+                    //OnPropertyChanged("Weekend");
+                    //OnPropertyChanged("PhotoProf");
+                    OnPropertyChanged();
+                }
             }
         }
         #endregion
-
+        #endregion
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -418,7 +405,7 @@ namespace MVVM
         {
             if (PropertyChanged != null)
             {
-               PropertyChanged(this, new PropertyChangedEventArgs(prop));
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
             }
         }
         #endregion
@@ -426,3 +413,5 @@ namespace MVVM
 
     
 }
+
+
