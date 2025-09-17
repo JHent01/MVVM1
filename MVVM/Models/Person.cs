@@ -14,7 +14,7 @@ namespace MVVM
         private string name;
         private string age;
         private string post;
-        private bool weekend;
+        private string weekend;
         private string pfotoProf;
 
         public string Name
@@ -46,7 +46,7 @@ namespace MVVM
             
         
         }
-        public bool Weekend
+        public string Weekend
         {
             get { return weekend; }
             set { weekend = value; /*OnPropertyChanged("Weekend"); }*/}

@@ -6,35 +6,26 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace MVVM
 {
-    public class PersonViewModel
+    public class PersonViewModel : INotifyPropertyChanged
     {
-        public string name { get; set; }
-        public string age { get; set; }
-        public EnumPost post;
-        public bool weekend; //Enum?
-        public Image photoProf;
+        private string name { get; set; }
+        private string age { get; set; }
+        private EnumPost post;
+        private EnumWeekend weekend; //Enum?
+        private BitmapImage photoProf;
 
-
-
-        //public PersonViewModel(string name, string age, EnumPost post, bool wikend, Image photoProf)
-        //{
-        //    Name = name;
-        //    Age = age;
-        //    Post = post;
-        //    Wikend = wikend;
-        //    PhotoProf = photoProf;
-        //}
        
-        public string Name
+        public string PersonName
         {
             get { return name; }
             set
             {
                 name = value;
-                OnPropertyChanged("name");
+                OnPropertyChanged();
             }
         }
         public string Age
@@ -57,23 +48,23 @@ namespace MVVM
                 OnPropertyChanged("post");
             }
         }
-        public bool Weekend
+        public Enum Weekend
         {
             get { return    weekend; }
             set
             {
-                weekend = value;
+                weekend = value is EnumWeekend ep ? ep : default;
                 OnPropertyChanged("weekend");
             }
 
 
         }
-        public Image PhotoProf
+        public BitmapImage PhotoProf
         {
             get { return photoProf; }
             set
             {
-                photoProf = (Image)value;
+                photoProf = (BitmapImage)value;
                 OnPropertyChanged("pfotoprof");
 
             }
@@ -85,6 +76,17 @@ namespace MVVM
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
+
+
+
+        //public PersonViewModel(string name, string age, EnumPost post, bool wikend, Image photoProf)
+        //{
+        //    Name = name;
+        //    Age = age;
+        //    Post = post;
+        //    Wikend = wikend;
+        //    PhotoProf = photoProf;
+        //}
 
         //public personviewmodel(person person)
         //{
