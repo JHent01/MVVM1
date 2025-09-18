@@ -1,5 +1,6 @@
-﻿using Microsoft.Win32;
-
+﻿using Microsoft.VisualBasic;
+using Microsoft.Win32;
+using MVVM;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,10 +11,10 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
-using MVVM.Converts;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -26,6 +27,7 @@ namespace MVVM
         public MainViewModel()
         {
             #region CommandsInitialization
+           // SearchCommand = new RelayCommand(Search);
             UpdetePhotoProf = new RelayCommand(UpdatePhotoProf); 
             AddCommand = new RelayCommand(Add);
             SaveCommand = new RelayCommand(Save);
@@ -40,11 +42,14 @@ namespace MVVM
         private ObservableCollection<PersonViewModel> _persons = new ObservableCollection<PersonViewModel>();
         public ObservableCollection<PersonViewModel> Persons
         {
-            get => _persons;
+            get => _persons ; 
             set
             {
 
-                _persons = value;
+                    _persons = value;
+                    //SearchList = _persons;
+
+
                 OnPropertyChanged();
             }
         }
@@ -74,8 +79,8 @@ namespace MVVM
                     VisibilityConverts = false;
                    
                 }
-
-                OnPropertyChanged("SelectedPerson");
+                SearchList = Persons;
+                OnPropertyChanged();
 
 
 
@@ -95,19 +100,94 @@ namespace MVVM
             }
         }
 
-        private bool _enableButton;
-        public bool EnableButton
+        private bool _enableButtonSaveJson;
+        public bool EnableButtonSaveJson
         {
-            get { return _enableButton; }
+            get { return _enableButtonSaveJson; }
             set
             {
-                _enableButton = value;
+                _enableButtonSaveJson = value;
                 OnPropertyChanged();
             }
         }
+        private bool _enableButtonClear ;
+        public bool EnableButtonClear
+        {
+            get { return _enableButtonClear; }
+            set
+            {
+                _enableButtonClear = value;
+                OnPropertyChanged();
+            }
+        }
+        private ObservableCollection<PersonViewModel> _searchList  = new ObservableCollection<PersonViewModel>();
+        public ObservableCollection<PersonViewModel> SearchList
+        {
+            get { return _searchList; }
+            set
+            {   
+                _searchList = value;
+                //if (_searchList.Count==0)
+                //{
+                //    _searchList = Persons;
+                //}
+                
+                OnPropertyChanged();
+            }
+        }
+        string _pattern;
+        public string Pattern
+        {
+            get => _pattern;
+            set
+            {
+                _pattern = value;
+                if (_pattern != "")
+                {
+                    
+                    if (Persons.FirstOrDefault(s => s.PersonName == (Pattern)) != null)
+                    {
+                        SearchNames = Persons.FirstOrDefault(s => s.PersonName == (Pattern));
+                        SearchList.Add(SearchNames);
+                       // VisibilityList = true;
+                    }
+                    else if (SearchList.Count==0)
+                    {
+                        SearchList = Persons;
+                    }
+                }
+                else
+                {
+                    SearchList.Clear();
+                }
+
+                OnPropertyChanged();
+            }
+        }
+        private bool _visibilityList;
+        public bool VisibilityList
+        {
+            get => _visibilityList;
+            set
+            {
+                _visibilityList = value;
+                OnPropertyChanged();
+            }
+        }
+        private PersonViewModel _searchNames;
+        public PersonViewModel SearchNames
+        {
+            get { return _searchNames; }
+            set
+            {
+                _searchNames = value;
+                OnPropertyChanged();
+            }
+        }
+
         #region Property
 
-        
+
         private string _names;
         public string Names
         {
@@ -176,7 +256,24 @@ namespace MVVM
 
         #endregion
         #region Commands
-        #region SaveOpenJson
+      
+        //public ICommand SearchCommand { get; private set; }
+        //private void Search()
+        //{
+        //    PersonViewModel dataToUpdate;
+           
+        //    for (int i = 0; i < Persons.Count; i++)
+        //    {
+        //        dataToUpdate = Persons.OfType<PersonViewModel>().ElementAt(i);
+        //        if (dataToUpdate.Age == this.Age && dataToUpdate.PersonName == this.Names)
+        //        {
+        //            SearchList.Add(dataToUpdate);
+        //        }
+        //    }
+           
+        //}
+
+
         public ObservableCollection<Person> OpenList { get; set; } = new ObservableCollection<Person>();
         public ICommand OpenJsonCommand { get; private set; }
         private void OpenJson()
@@ -221,8 +318,11 @@ namespace MVVM
             Nullable<bool> result = dlg.ShowDialog();
             if (result == true)
             {
-                string pach = dlg.FileName.Remove(dlg.FileName.Length - dlg.SafeFileName.Length, dlg.SafeFileName.Length);
-                Directory.CreateDirectory(pach + "Image");
+                FileInfo fileInfo = new FileInfo(dlg.FileName);
+                string pach = fileInfo.DirectoryName;
+                              
+                Directory.CreateDirectory(Path.Combine(pach,"Image"));
+
                 var peopleToSave = new ObservableCollection<Person>();
 
                 for (int i = 0; i < Persons.Count; i++)
@@ -236,23 +336,22 @@ namespace MVVM
                         }
                         var encoder = new PngBitmapEncoder();
                         encoder.Frames.Add(BitmapFrame.Create((BitmapSource)person.PhotoProf));
-
-                        using (var fileStream = new FileStream(System.IO.Path.Combine(pach + "Image", $"image{i}.png"), FileMode.Create))
+                        string filePath = Path.Combine(pach, "Image", $"image{i}.png");
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
                         {
                             encoder.Save(fileStream);
                         }
-                        peopleToSave.Add(new Person { Name = person.PersonName, Age = person.Age, Post = person.Post.ToString(), Weekend = person.Weekend.ToString(), PfotoProf = System.IO.Path.Combine(pach + "Image", $"image{i}.png") });
+                        peopleToSave.Add(new Person { Name = person.PersonName, Age = person.Age, Post = person.Post.ToString(), Weekend = person.Weekend.ToString(), PfotoProf = filePath });
                     }
                     string jsonContent = System.Text.Json.JsonSerializer.Serialize(peopleToSave);
                     File.WriteAllText(dlg.FileName, jsonContent);
                 }
-                MessageBox.Show("Файл збережено");
-                EnableButton= false;  
-                OnPropertyChanged();
+                MessageBox.Show("Файл збережено" + dlg.FileName);
+                EnableButtonSaveJson= false;
             }
         }
-        #endregion
-        #region ChangedComands
+       
+        
         public ICommand SaveCommand { get; private set; }
         private void Save()
         {
@@ -262,13 +361,21 @@ namespace MVVM
             bool check = false;
             for (int i = 0; i < Persons.Count; i++)
             {
-                dataToUpdate = Persons.OfType<PersonViewModel>().ElementAt(i);
-                if (dataToUpdate.Age == SelectedPerson.Age && dataToUpdate.PersonName == SelectedPerson.PersonName && dataToUpdate.Post.ToString() == SelectedPerson.Post.ToString())
+                dataToUpdate = Persons[i];// Persons.OfType<PersonViewModel>().ElementAt(i);
+             
+                var a = dataToUpdate.GetType().GetProperties().Where(p=> dataToUpdate.PersonName== SelectedPerson.PersonName&& dataToUpdate.Age== SelectedPerson.Age&& dataToUpdate.Post== SelectedPerson.Post);
+                if (a.Count()>0)
                 {
                     check = true;
-
                     break;
                 }
+
+                //if (dataToUpdate.Age == SelectedPerson.Age && dataToUpdate.PersonName == SelectedPerson.PersonName && dataToUpdate.Post.ToString() == SelectedPerson.Post.ToString())
+                //{
+                //    check = true;
+
+                //    break;
+                //}
             }
             if (check)
             {
@@ -278,11 +385,10 @@ namespace MVVM
                 dataToUpdate.Weekend = (EnumWeekend)(Weekend != null ? Weekend : default);
                 dataToUpdate.PhotoProf = PhotoProf;
             }
-            //else
-            //{
-            //    Persons.Add(new PersonViewModel { PersonName = Names, Age = Age, Post = Post, Weekend = Weekend, PhotoProf = PhotoProf });
-            //    SelectedPerson = null;
-            //}
+            else
+            {//нужно обновить в этом случае выбранного человека
+                Persons.Add(new PersonViewModel { PersonName = Names, Age=Age, Post=Post,Weekend=Weekend,PhotoProf=PhotoProf });
+            }
 
 
         }
@@ -329,15 +435,16 @@ namespace MVVM
                 }
             }
         }
-        #endregion
-        #region AddDeleteClearAll  
+       
+         
         public ICommand AddCommand { get; private set; }
         private void Add()
         {
             SelectedPerson = (new PersonViewModel { PersonName = "New Person", Age = "0", Post = default, Weekend = default, PhotoProf = new BitmapImage(new Uri("/Image/Baze.jpg", UriKind.Relative)) });
-            Persons.Add(SelectedPerson);
-            EnableButton= true;
-            OnPropertyChanged();//"Persons"
+            //Persons.Add(SelectedPerson);
+            EnableButtonSaveJson= true;
+            EnableButtonClear = true;
+            //OnPropertyChanged();//"Persons"
         }
         public ICommand DeleteCommand { get; private set; }
         private void DeletePerson()
@@ -360,9 +467,10 @@ namespace MVVM
                     VisibilityConverts = false;
                     if (Persons.Count == 0)
                     {
-                        EnableButton = false;
+                        EnableButtonSaveJson = false;
+                        EnableButtonClear = false;
                     }   
-                    OnPropertyChanged();
+                   
                 }
             }
         }
@@ -380,23 +488,19 @@ namespace MVVM
 
 
                     Persons.Clear();
-                    _names = string.Empty;
-                    _age = string.Empty;
-                    _post = default;
-                    _weekend = default;
-                    _photoProf = null;
+                    Names = string.Empty;
+                    Age = string.Empty;
+                    Post = default;//__
+                    Weekend = default;
+                    PhotoProf= null;
                     VisibilityConverts = false;
-                    EnableButton = false;
-                    //OnPropertyChanged("Names");
-                    //OnPropertyChanged("Age");
-                    //OnPropertyChanged("Post");
-                    //OnPropertyChanged("Weekend");
-                    //OnPropertyChanged("PhotoProf");
-                    OnPropertyChanged();
+                    EnableButtonSaveJson = false;
+                    EnableButtonClear= false;
+                    
                 }
             }
         }
-        #endregion
+        
         #endregion
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;

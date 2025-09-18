@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace MVVM
 {
-    public class Person //: INotifyPropertyChanged
+    public class Person 
     {
         private string name;
         private string age;
@@ -23,7 +23,7 @@ namespace MVVM
             set
             { 
                 name = value;
-                //OnPropertyChanged("Name");
+              
 
             }
         }
@@ -32,7 +32,7 @@ namespace MVVM
             get { return age; }
             set
             {
-                age = value; /*OnPropertyChanged("Age");*/
+                age = value;
             }
         
         }
@@ -41,7 +41,7 @@ namespace MVVM
             get { return post; }
             set
             {
-                post = value; /*OnPropertyChanged("Post");*/
+                post = value; 
             }
             
         
@@ -49,7 +49,7 @@ namespace MVVM
         public string Weekend
         {
             get { return weekend; }
-            set { weekend = value; /*OnPropertyChanged("Weekend"); }*/}
+            set { weekend = value; }
         }
         public string PfotoProf
         { 
@@ -57,17 +57,11 @@ namespace MVVM
 
             set
             {
-                pfotoProf = value; /*OnPropertyChanged("PfotoProf");*/
+                pfotoProf = value; 
             }
         }
 
 
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //public void OnPropertyChanged([CallerMemberName] string prop = "")
-        //{
-        //    if (PropertyChanged != null)
-        //        PropertyChanged(this, new PropertyChangedEventArgs(prop));
-        //}
-
+        
     }
 }

@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
-namespace MVVM.Converts
+namespace MVVM
 {
     class EnableButtonConvert : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
+            if (value is bool boolValue)// value.TryParse<string>() returns bool=true 
             {
-                return !boolValue;
+                return boolValue;
             }
             return false;
         }

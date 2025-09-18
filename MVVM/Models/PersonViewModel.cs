@@ -5,7 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace MVVM
@@ -15,10 +17,31 @@ namespace MVVM
         private string name { get; set; }
         private string age { get; set; }
         private EnumPost post;
-        private EnumWeekend weekend; //Enum?
+        private EnumWeekend weekend; 
         private BitmapImage photoProf;
+        //public PersonViewModel()
+        //{
+        //    DeleteCommand = new RelayCommand(DeletePerson);
 
-       
+
+        //}
+        //public ICommand DeleteCommand { get; private set; }
+        //private void DeletePerson()
+        //{
+        //    MessageBoxResult result = MessageBox.Show("Видалити Людину?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        //    {
+        //        if (result == MessageBoxResult.No)
+        //        {
+        //            return;
+        //        }
+        //        else if (result == MessageBoxResult.Yes)
+        //        {
+        //            var f = this;
+        //           //Persons.Instance.PersonsList.Remove(this);
+
+        //        }
+        //    }
+        //}
         public string PersonName
         {
             get { return name; }
@@ -39,21 +62,22 @@ namespace MVVM
             }
 
         }
-        public Enum Post
+
+        public EnumPost Post
         {
             get { return post; }
             set
             {
-                post = value is EnumPost ep ? ep : default;
+                post = value;
                 OnPropertyChanged("post");
             }
         }
-        public Enum Weekend
+        public EnumWeekend Weekend
         {
             get { return    weekend; }
             set
             {
-                weekend = value is EnumWeekend ep ? ep : default;
+                weekend = value;
                 OnPropertyChanged("weekend");
             }
 
@@ -79,19 +103,7 @@ namespace MVVM
 
 
 
-        //public PersonViewModel(string name, string age, EnumPost post, bool wikend, Image photoProf)
-        //{
-        //    Name = name;
-        //    Age = age;
-        //    Post = post;
-        //    Wikend = wikend;
-        //    PhotoProf = photoProf;
-        //}
-
-        //public personviewmodel(person person)
-        //{
-        //    _person = person;
-        //}
+       
 
     }
 }
