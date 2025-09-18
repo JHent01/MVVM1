@@ -12,7 +12,7 @@ namespace MVVM
     public class Person 
     {
         private string name;
-        private string age;
+        private int age;
         private string post;
         private string weekend;
         private string pfotoProf;
@@ -27,7 +27,7 @@ namespace MVVM
 
             }
         }
-        public string Age
+        public int Age
         { 
             get { return age; }
             set

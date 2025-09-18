@@ -15,33 +15,11 @@ namespace MVVM
     public class PersonViewModel : INotifyPropertyChanged
     {
         private string name { get; set; }
-        private string age { get; set; }
+        private int age { get; set; }
         private EnumPost post;
         private EnumWeekend weekend; 
         private BitmapImage photoProf;
-        //public PersonViewModel()
-        //{
-        //    DeleteCommand = new RelayCommand(DeletePerson);
-
-
-        //}
-        //public ICommand DeleteCommand { get; private set; }
-        //private void DeletePerson()
-        //{
-        //    MessageBoxResult result = MessageBox.Show("Видалити Людину?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-        //    {
-        //        if (result == MessageBoxResult.No)
-        //        {
-        //            return;
-        //        }
-        //        else if (result == MessageBoxResult.Yes)
-        //        {
-        //            var f = this;
-        //           //Persons.Instance.PersonsList.Remove(this);
-
-        //        }
-        //    }
-        //}
+  
         public string PersonName
         {
             get { return name; }
@@ -51,7 +29,7 @@ namespace MVVM
                 OnPropertyChanged();
             }
         }
-        public string Age
+        public int Age
         {
             get { return age; }
             set

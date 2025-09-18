@@ -27,7 +27,7 @@ namespace MVVM
         public MainViewModel()
         {
             #region CommandsInitialization
-           // SearchCommand = new RelayCommand(Search);
+           
             UpdetePhotoProf = new RelayCommand(UpdatePhotoProf); 
             AddCommand = new RelayCommand(Add);
             SaveCommand = new RelayCommand(Save);
@@ -47,7 +47,7 @@ namespace MVVM
             {
 
                     _persons = value;
-                    //SearchList = _persons;
+                    SearchList = Persons.ToList();
 
 
                 OnPropertyChanged();
@@ -64,7 +64,7 @@ namespace MVVM
 
                 _selectedPerson = value;
                 Names = SelectedPerson?.PersonName;
-                Age = SelectedPerson?.Age;
+                Age = (int?)SelectedPerson?.Age??0;
                 if (SelectedPerson != null) Post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
                 if (SelectedPerson != null) Weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
                 PhotoProf = SelectedPerson?.PhotoProf;
@@ -79,7 +79,7 @@ namespace MVVM
                     VisibilityConverts = false;
                    
                 }
-                SearchList = Persons;
+               
                 OnPropertyChanged();
 
 
@@ -120,17 +120,14 @@ namespace MVVM
                 OnPropertyChanged();
             }
         }
-        private ObservableCollection<PersonViewModel> _searchList  = new ObservableCollection<PersonViewModel>();
-        public ObservableCollection<PersonViewModel> SearchList
+        private List<PersonViewModel> _searchList  = new List<PersonViewModel>();
+        public List<PersonViewModel> SearchList
         {
             get { return _searchList; }
             set
             {   
                 _searchList = value;
-                //if (_searchList.Count==0)
-                //{
-                //    _searchList = Persons;
-                //}
+                
                 
                 OnPropertyChanged();
             }
@@ -144,21 +141,19 @@ namespace MVVM
                 _pattern = value;
                 if (_pattern != "")
                 {
-                    
-                    if (Persons.FirstOrDefault(s => s.PersonName == (Pattern)) != null)
+                    SearchList.Clear();
+
+
+                    SearchList = Persons.Where(p => p.PersonName != null && p.PersonName.ToLower().Contains(Pattern.ToLower())||p.Age.ToString().ToLower().Contains(Pattern.ToLower())).ToList();     //.IndexOf(_pattern, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                        // VisibilityList = true;
+                   if (SearchList.Count==0)
                     {
-                        SearchNames = Persons.FirstOrDefault(s => s.PersonName == (Pattern));
-                        SearchList.Add(SearchNames);
-                       // VisibilityList = true;
-                    }
-                    else if (SearchList.Count==0)
-                    {
-                        SearchList = Persons;
+                        SearchList = Persons.ToList();
                     }
                 }
                 else
                 {
-                    SearchList.Clear();
+                    SearchList = Persons.ToList();
                 }
 
                 OnPropertyChanged();
@@ -174,16 +169,7 @@ namespace MVVM
                 OnPropertyChanged();
             }
         }
-        private PersonViewModel _searchNames;
-        public PersonViewModel SearchNames
-        {
-            get { return _searchNames; }
-            set
-            {
-                _searchNames = value;
-                OnPropertyChanged();
-            }
-        }
+
 
         #region Property
 
@@ -203,15 +189,19 @@ namespace MVVM
             }
         }
 
-        private string _age;
-        public string Age
+        private int _age;
+        public int Age
         {
             get { return _age; }
             set
             {
-
-                _age = value;
-                OnPropertyChanged("Age");
+                if (int.TryParse(value.ToString(), out int result))
+                {
+                    _age = result;
+                    OnPropertyChanged("Age");
+                }
+                    
+              
 
             }
         }
@@ -257,23 +247,7 @@ namespace MVVM
         #endregion
         #region Commands
       
-        //public ICommand SearchCommand { get; private set; }
-        //private void Search()
-        //{
-        //    PersonViewModel dataToUpdate;
-           
-        //    for (int i = 0; i < Persons.Count; i++)
-        //    {
-        //        dataToUpdate = Persons.OfType<PersonViewModel>().ElementAt(i);
-        //        if (dataToUpdate.Age == this.Age && dataToUpdate.PersonName == this.Names)
-        //        {
-        //            SearchList.Add(dataToUpdate);
-        //        }
-        //    }
-           
-        //}
-
-
+    
         public ObservableCollection<Person> OpenList { get; set; } = new ObservableCollection<Person>();
         public ICommand OpenJsonCommand { get; private set; }
         private void OpenJson()
@@ -287,7 +261,7 @@ namespace MVVM
             if (result == true)
             {
                 Persons.Clear();
-
+                SearchList.Clear();
                 string jsonContent = File.ReadAllText(dlg.FileName);
                 OpenList = System.Text.Json.JsonSerializer.Deserialize<ObservableCollection<Person>>(jsonContent);
 
@@ -357,14 +331,19 @@ namespace MVVM
         {
             
             PersonViewModel dataToUpdate = null;
-
+            List<string> namesList = new List<string>();
+            foreach (var person in Persons)
+            {
+                namesList.Add(person.PersonName);
+            }
             bool check = false;
             for (int i = 0; i < Persons.Count; i++)
             {
                 dataToUpdate = Persons[i];// Persons.OfType<PersonViewModel>().ElementAt(i);
-             
-                var a = dataToUpdate.GetType().GetProperties().Where(p=> dataToUpdate.PersonName== SelectedPerson.PersonName&& dataToUpdate.Age== SelectedPerson.Age&& dataToUpdate.Post== SelectedPerson.Post);
-                if (a.Count()>0)
+                                          // ісправить
+                                          // var a = dataToUpdate.GetType().GetProperties().Where(p=> dataToUpdate.PersonName== SelectedPerson.PersonName&& dataToUpdate.Age== Age&& dataToUpdate.Post==Post);
+                var a = dataToUpdate.GetHashCode() == SelectedPerson.GetHashCode();
+                if (a)
                 {
                     check = true;
                     break;
@@ -376,18 +355,37 @@ namespace MVVM
 
                 //    break;
                 //}
+               
             }
             if (check)
             {
-                dataToUpdate.PersonName = Names;
+                if (!namesList.Contains(Names))
+                {
+                    dataToUpdate.PersonName = Names;
+                }
+                //MessageBox.Show("Таке Імя вже існує");
                 dataToUpdate.Age = Age;
                 dataToUpdate.Post = (EnumPost)(Post != null ? Post : default);
                 dataToUpdate.Weekend = (EnumWeekend)(Weekend != null ? Weekend : default);
                 dataToUpdate.PhotoProf = PhotoProf;
+                SelectedPerson = dataToUpdate;
             }
-            else
-            {//нужно обновить в этом случае выбранного человека
-                Persons.Add(new PersonViewModel { PersonName = Names, Age=Age, Post=Post,Weekend=Weekend,PhotoProf=PhotoProf });
+               
+            
+            else 
+            { 
+                
+                if (!namesList.Contains(Names))
+                {
+                    SelectedPerson = (new PersonViewModel { PersonName = Names, Age = Age, Post = Post, Weekend = Weekend, PhotoProf = PhotoProf });
+
+                    Persons.Add(SelectedPerson);
+                    SearchList = Persons.ToList();
+                }
+                else
+               
+                MessageBox.Show("Таке Імя вже існує");
+               
             }
 
 
@@ -419,12 +417,12 @@ namespace MVVM
                 else if (result == MessageBoxResult.Yes)
                 {
 
-                    _names = SelectedPerson?.PersonName;
-                    _age = SelectedPerson?.Age;
-                    _post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
-                    _weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
-                    _photoProf = SelectedPerson?.PhotoProf;
-                    //SelectedPerson = _selectedPerson;
+                    Names = SelectedPerson?.PersonName;
+                   Age = (int)SelectedPerson?.Age;
+                   Post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
+                    Weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
+                    PhotoProf = SelectedPerson?.PhotoProf;
+                    
                     OnPropertyChanged("Names");
                     OnPropertyChanged("Age");
                     OnPropertyChanged("Post");
@@ -440,11 +438,11 @@ namespace MVVM
         public ICommand AddCommand { get; private set; }
         private void Add()
         {
-            SelectedPerson = (new PersonViewModel { PersonName = "New Person", Age = "0", Post = default, Weekend = default, PhotoProf = new BitmapImage(new Uri("/Image/Baze.jpg", UriKind.Relative)) });
-            //Persons.Add(SelectedPerson);
+            SelectedPerson = (new PersonViewModel { PersonName = "New Person", Age = 0, Post = default, Weekend = default, PhotoProf = new BitmapImage(new Uri("/Image/Baze.jpg", UriKind.Relative)) });
+            
             EnableButtonSaveJson= true;
             EnableButtonClear = true;
-            //OnPropertyChanged();//"Persons"
+           
         }
         public ICommand DeleteCommand { get; private set; }
         private void DeletePerson()
@@ -462,7 +460,7 @@ namespace MVVM
                     {//_persons??
                         Persons.Remove(SelectedPerson);
                         SelectedPerson = null;
-                        OnPropertyChanged("Persons");
+                       SearchList = Persons.ToList();
                     }
                     VisibilityConverts = false;
                     if (Persons.Count == 0)
@@ -488,8 +486,9 @@ namespace MVVM
 
 
                     Persons.Clear();
+                    SearchList = Persons.ToList();
                     Names = string.Empty;
-                    Age = string.Empty;
+                    Age = 0;
                     Post = default;//__
                     Weekend = default;
                     PhotoProf= null;

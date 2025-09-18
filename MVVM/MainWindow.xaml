@@ -15,10 +15,12 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/StyleButton.xaml"/>
+                <!--<ResourceDictionary Source="Styles/TextBoxWotermarc.xaml"/>-->
             </ResourceDictionary.MergedDictionaries>
             
                 <local:VisibilityConvert x:Key="VisibilityConvert"/>
                 <local:EnableButtonConvert x:Key="EnableButtonConvert"/>
+                 <!--<local:WoterMarkConvert x:Key="WoterMarkConvert" />-->
 
         </ResourceDictionary>
   
@@ -44,56 +46,42 @@
         </Grid.RowDefinitions>
 
         <Label  Content="Імена" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center"  VerticalAlignment="Center"/>
-        <TextBox Grid.Row="3" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}" Width="140" Height="25" Margin="0,0,0,0" FontSize="15"    HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="Black"    Background ="AliceBlue" />
-
+        <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1">
+            <TextBox  Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"   FontSize="15" Width="140" Height="25" HorizontalAlignment="Center" 
+VerticalAlignment="Top" Background ="AliceBlue" /> <!--Style="{StaticResource WoterMarkConvert}"-->
+        </Border>
         <ListBox  Grid.Column="0" Grid.Row="3" ItemsSource="{Binding SearchList}"  SelectedItem="{Binding SelectedPerson}"     Margin="0,25,0,25" >
+           
             <ListBox.ItemTemplate>
                 
                 <DataTemplate>
                     
                     <TextBlock >
                          
+                       <Button Content="X" Width="15"  Height="15" FontSize="9" HorizontalAlignment="Right" Margin="120,0,0,0" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />  
+                       <LineBreak/>
                         <Run Text="{Binding PersonName,UpdateSourceTrigger=PropertyChanged}" FontSize="18"/> 
-                        <Button Content="X" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="15,0,0,0"   Command="{Binding DeleteCommand}"    />  <LineBreak/>  <!-- Style="{StaticResource ButtonStyle}"  IsEnabled="{Binding EnableButtonClear,UpdateSourceTrigger=PropertyChanged ,  Converter={StaticResource EnableButtonConvert}}"-->
-                        <Run Text="Вік: " FontSize="10"/>
-                        <Run Text="{Binding Age}" FontSize="10"/>
-                        <Run Text="Посада: " FontSize="10"/>
+                        
+                        <LineBreak/>  <!-- Style="{StaticResource ButtonStyle}"  IsEnabled="{Binding EnableButtonClear,UpdateSourceTrigger=PropertyChanged ,  Converter={StaticResource EnableButtonConvert}}"-->
+                        <Run Text="Вік: " FontSize="12"/>
+                        <Run Text="{Binding Age}" FontSize="12"/> 
+                        
+                        <LineBreak/>
+                        <Run Text="Посада: " FontSize="12"/>
                         <Run Text="{Binding Post,  UpdateSourceTrigger=PropertyChanged}"  FontSize="10"/>
                       
                     </TextBlock>
-                   
-                    <!--CommandParameter="{Binding}"     Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}-->
-                </DataTemplate>
-               
+                    
+                  </DataTemplate>
+                
             </ListBox.ItemTemplate>
             
         </ListBox>
-        <!--<ListBox  Grid.Column="0" Grid.Row="3" ItemsSource="{Binding SearchList}"  SelectedItem="{Binding SelectedPerson}"   Visibility="{Binding VisibilityList, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource VisibilityConvert}}"   Margin="0,25,0,25" >
-            <ListBox.ItemTemplate>
-
-                <DataTemplate>
-
-                    <TextBlock >
-                  
-                 <Run Text="{Binding PersonName,UpdateSourceTrigger=PropertyChanged}" FontSize="18"/> <Button Content="X" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="15,0,0,0"   Command="{Binding DeleteCommand}"    />  <LineBreak/>  --><!-- Style="{StaticResource ButtonStyle}"  IsEnabled="{Binding EnableButtonClear,UpdateSourceTrigger=PropertyChanged ,  Converter={StaticResource EnableButtonConvert}}"--><!--
-                 <Run Text="Вік: " FontSize="10"/>
-                 <Run Text="{Binding Age}" FontSize="10"/>
-                 <Run Text="Посада: " FontSize="10"/>
-                 <Run Text="{Binding Post,  UpdateSourceTrigger=PropertyChanged}"  FontSize="10"/>
-
-                    </TextBlock>
-
-                    --><!--CommandParameter="{Binding}"     Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}--><!--
-                </DataTemplate>
-
-            </ListBox.ItemTemplate>
-
-        </ListBox>-->
+     
         <Button Grid.Row="1" Name="Add" Content="Додати"  Style="{StaticResource ButtonStyle}" Command="{Binding AddCommand}"  />
 
         <Button Grid.Row="2" Name="Clear" Content="Очистити все"  Style="{StaticResource ButtonStyle}" Command="{Binding ClearAllCommand}" IsEnabled="{Binding EnableButtonClear,UpdateSourceTrigger=PropertyChanged ,  Converter={StaticResource EnableButtonConvert}}" />
-        <!--<Button Grid.Row="3" Name="Delete" Content="Видалити"  Style="{StaticResource ButtonStyle}" Command="{Binding DeleteCommand}" IsEnabled="{Binding EnableButtonClear,UpdateSourceTrigger=PropertyChanged ,  Converter={StaticResource EnableButtonConvert}}" />-->
-
+     
         <Grid Name="Info" Grid.Column="1" Grid.Row="0" Grid.RowSpan="6" Visibility="{Binding VisibilityConverts, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource VisibilityConvert}}"  Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="230" />
@@ -130,7 +118,7 @@
 
 
             <TextBox  Grid.Column="3" Grid.Row="2" Name="NameBox" Text="{Binding Names }"  Width="100" Height="30" Margin="0,0,10,10" FontSize="15" />
-            <TextBox  Grid.Column="3" Grid.Row="3" Name="AgeBox" Text="{Binding Age}" Width="100" Height="30" Margin="0,0,10,10"  FontSize="15" />
+            <TextBox  Grid.Column="3" Grid.Row="3" Name="AgeBox"  Text="{Binding Age}" Width="100" Height="30" Margin="0,0,10,10"  FontSize="15" />
 
 
             <ComboBox Grid.Column="3" Grid.Row="4" Name="PostBox" Width="auto" Margin="0,0,10,10" Height="30" ItemsSource="{Binding Source={local:ConvertEnum {x:Type local:EnumPost}}, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Post}" IsReadOnly="True" />
