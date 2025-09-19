@@ -1,24 +1,12 @@
-﻿using Microsoft.VisualBasic;
-using Microsoft.Win32;
-using MVVM;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
+
 
 namespace MVVM
 {
@@ -145,7 +133,7 @@ namespace MVVM
 
 
                     SearchList = Persons.Where(p => p.PersonName != null && p.PersonName.ToLower().Contains(Pattern.ToLower())||p.Age.ToString().ToLower().Contains(Pattern.ToLower())).ToList();     //.IndexOf(_pattern, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
-                        // VisibilityList = true;
+                        
                    if (SearchList.Count==0)
                     {
                         SearchList = Persons.ToList();
@@ -331,42 +319,20 @@ namespace MVVM
         {
             
             PersonViewModel dataToUpdate = null;
-            List<string> namesList = new List<string>();
-            foreach (var person in Persons)
-            {
-                namesList.Add(person.PersonName);
-            }
-            bool check = false;
-            for (int i = 0; i < Persons.Count; i++)
-            {
-                dataToUpdate = Persons[i];// Persons.OfType<PersonViewModel>().ElementAt(i);
-                                          // ісправить
-                                          // var a = dataToUpdate.GetType().GetProperties().Where(p=> dataToUpdate.PersonName== SelectedPerson.PersonName&& dataToUpdate.Age== Age&& dataToUpdate.Post==Post);
-                var a = dataToUpdate.GetHashCode() == SelectedPerson.GetHashCode();
-                if (a)
-                {
-                    check = true;
-                    break;
-                }
 
-                //if (dataToUpdate.Age == SelectedPerson.Age && dataToUpdate.PersonName == SelectedPerson.PersonName && dataToUpdate.Post.ToString() == SelectedPerson.Post.ToString())
-                //{
-                //    check = true;
-
-                //    break;
-                //}
-               
-            }
-            if (check)
+           
+           ComparerInterface comparerInterface = new ComparerInterface();
+            if (Persons.Any(x=> comparerInterface.ComparePerson(x,SelectedPerson)==1))
             {
-                if (!namesList.Contains(Names))
+                dataToUpdate = Persons.FirstOrDefault(x=> x.PersonName == SelectedPerson.PersonName);
+                if (!Persons.Any(x => x.PersonName == Names))
                 {
                     dataToUpdate.PersonName = Names;
                 }
-                //MessageBox.Show("Таке Імя вже існує");
+                
                 dataToUpdate.Age = Age;
-                dataToUpdate.Post = (EnumPost)(Post != null ? Post : default);
-                dataToUpdate.Weekend = (EnumWeekend)(Weekend != null ? Weekend : default);
+                dataToUpdate.Post = Post;
+                dataToUpdate.Weekend = Weekend;
                 dataToUpdate.PhotoProf = PhotoProf;
                 SelectedPerson = dataToUpdate;
             }
@@ -375,12 +341,13 @@ namespace MVVM
             else 
             { 
                 
-                if (!namesList.Contains(Names))
+                if (!Persons.Any(x => x.PersonName == Names)| Persons.Count==0 )
                 {
                     SelectedPerson = (new PersonViewModel { PersonName = Names, Age = Age, Post = Post, Weekend = Weekend, PhotoProf = PhotoProf });
 
                     Persons.Add(SelectedPerson);
                     SearchList = Persons.ToList();
+              //      MessageBox.Show("Додано");
                 }
                 else
                
@@ -457,7 +424,7 @@ namespace MVVM
                 {
 
                     if (SelectedPerson != null)
-                    {//_persons??
+                    {
                         Persons.Remove(SelectedPerson);
                         SelectedPerson = null;
                        SearchList = Persons.ToList();
@@ -489,7 +456,7 @@ namespace MVVM
                     SearchList = Persons.ToList();
                     Names = string.Empty;
                     Age = 0;
-                    Post = default;//__
+                    Post = default;
                     Weekend = default;
                     PhotoProf= null;
                     VisibilityConverts = false;
