@@ -52,6 +52,7 @@ namespace MVVM
 
                 _selectedPerson = value;
                 Names = SelectedPerson?.PersonName;
+               
                 Age = (int?)SelectedPerson?.Age??0;
                 if (SelectedPerson != null) Post = (EnumPost)(SelectedPerson != null ? SelectedPerson.Post : default);
                 if (SelectedPerson != null) Weekend = (EnumWeekend)(SelectedPerson != null ? SelectedPerson.Weekend : default);
@@ -183,13 +184,24 @@ namespace MVVM
             get { return _age; }
             set
             {
-                if (int.TryParse(value.ToString(), out int result))
+                if (int.TryParse(value.ToString(),out int i))
                 {
-                    _age = result;
-                    OnPropertyChanged("Age");
+                    if (i < 0 || i > 120)
+                    { MessageBox.Show("Введіть коректний вік"); }
+                    else
+                    {
+                        _age = i;
+                        OnPropertyChanged("Age");
+
+                    }
+                   
                 }
-                    
-              
+                else 
+                {
+                    MessageBox.Show("Введіть коректний вік");
+                }
+
+
 
             }
         }
